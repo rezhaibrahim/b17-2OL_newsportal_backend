@@ -5,14 +5,16 @@ const cors = require('cors')
 
 const app = express()
 const { APP_PORT, APP_IP_ADDRESS } = process.env
-
+//import
+const usersRoute = require('./router/user')
 // middleware
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(morgan('dev'))
 app.use(cors())
 
-const usersRoute = require('./router/user')
-app.use('/users', usersRoute)
+//
+app.use('/user', usersRoute)
+
 const server = app.listen(APP_PORT, APP_IP_ADDRESS, () => {
   const host = server.address().address
   const port = server.address().port
