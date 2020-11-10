@@ -10,11 +10,11 @@ module.exports = {
     const data = Object.keys(req.body)
     if (data[0] === 'email') {
       const schemaLoginEmail = Joi.object({
-        email: Joi.string().max(255).required(),
+        email: Joi.string().email().max(255).required(),
         password: Joi.string().min(4).max(10).required()
       })
       const { error, value } = schemaLoginEmail.validate(req.body)
-      console.log(value)
+      //   console.log(value)
       if (error) {
         return responseStandard(res, error.message, {}, 400, false)
       } else {
@@ -27,7 +27,7 @@ module.exports = {
           const isPasswordMatch = bcrypt.compareSync(password, validEmail[0].dataValues.password)
 
           if (isPasswordMatch) {
-            jwt.sign({ id: validEmail[0].dataValues.id }, USER_KEY, { expiresIn: '1d' }, (_error, token) => {
+            jwt.sign({ id: validEmail[0].dataValues.id }, USER_KEY, { expiresIn: 86400 /* Expired 24 Hours */ }, (_error, token) => {
               return responseStandard(res, 'Login success!', { token })
             })
           } else {
@@ -51,7 +51,7 @@ module.exports = {
         const validUserName = await Users.findAll({
           where: { userName: userName }
         })
-
+        console.log(validUserName.length)
         if (validUserName.length) {
           const isPasswordMatch = bcrypt.compareSync(password, validUserName[0].dataValues.password)
 
@@ -65,6 +65,36 @@ module.exports = {
         } else {
           return responseStandard(res, 'userName not found!', {}, 404, false)
         }
+      }
+    }
+  },
+  forgotPassword: async (req, res) => {
+    console.log(req.body)
+    const schema = Joi.object({
+      email: Joi.string().email().required(),
+      newPassword: Joi.string().required(),
+      latePassword: Joi.string().required()
+    })
+    const { error, value: results } = schema.validate(req.body)
+
+    if (error) {
+      return responseStandard(res, error.message, {}, 400, false)
+    }
+    if (results.newPassword === results.latePassword) {
+        return responseStandard(res, 'Failed to update Password', {}, 400, false)
+    }else{
+        const result = await Users.findOne({ where: { email: results.email } })
+      console.log(result.dataValues);
+      if (result) {
+        const salt = bcrypt.genSaltSync(10)
+        const hash = bcrypt.hashSync(results.newPassword, salt)
+        const data = await Users.update({password:hash}, { where: {email:results.email}})
+        // console.log("ini update",data);
+        if (data) {
+            return responseStandard(res, 'change password successfully', { data: result })
+          } else {
+            return responseStandard(res, 'Failed to update', {}, 400, false)
+          }
       }
     }
   }

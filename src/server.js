@@ -8,6 +8,8 @@ const { APP_PORT, APP_IP_ADDRESS } = process.env
 // import
 const usersRoute = require('./router/user')
 const authRoute = require('./router/auth')
+const forgotPasswordRoute = require('./router/forgotPassword')
+const authMidlleware = require('../src/middlewares/auth')
 // middleware
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(morgan('dev'))
@@ -16,6 +18,14 @@ app.use(cors())
 //
 app.use('/user', usersRoute)
 app.use('/', authRoute)
+app.use('/', forgotPasswordRoute)
+
+app.get('/', async (req, res) => {
+  console.log('connection success!')
+  return res.status(200).send({
+    message: 'connection success!'
+  })
+})
 
 const server = app.listen(APP_PORT, APP_IP_ADDRESS, () => {
   const host = server.address().address

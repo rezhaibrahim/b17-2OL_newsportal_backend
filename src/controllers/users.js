@@ -24,17 +24,16 @@ module.exports = {
         where: { email: email }
       })
       const validationUserName = await Users.findAll({
-        where: { userName:userName }
+        where: { userName: userName }
       })
-      
+
       if (validationEmail.length) {
         return responseStandard(res, 'Email already registered!', {}, 403, false)
       } else if (validationUserName.length) {
         return responseStandard(res, 'Username already registered!', {}, 403, false)
-      }else if(password.length > 8 || password.length < 8){
+      } else if (password.length > 8 || password.length < 8) {
         return responseStandard(res, 'password is too short or too long, minimum and maximum 8 digits', {}, 403, false)
-      }
-       else {
+      } else {
         const salt = bcrypt.genSaltSync(10)
         const hashedPassword = bcrypt.hashSync(password, salt)
         // console.log(hashedPassword);
