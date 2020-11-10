@@ -16,9 +16,9 @@ app.use(morgan('dev'))
 app.use(cors())
 
 //
-app.use('/user', usersRoute)
 app.use('/', authRoute)
 app.use('/', forgotPasswordRoute)
+app.use('/users', authMidlleware, usersRoute)
 
 app.get('/', async (req, res) => {
   console.log('connection success!')
