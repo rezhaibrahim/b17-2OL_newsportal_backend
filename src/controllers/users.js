@@ -3,9 +3,10 @@
 const responseStandard = require('../helpers/response')
 const Joi = require('joi')
 const upload = require('../helpers/upload')
+const paging = require('../helpers/pagination')
 const { Users, News } = require('../models')
-const news = require('../models/news')
-
+const { Op } = require('sequelize')
+const { APP_URL,APP_PORT } = process.env
 module.exports = {
   viewUserProfile: async (req, res) => {
     const { id } = req.user
@@ -174,4 +175,15 @@ module.exports = {
       return responseStandard(res, 'Delete news failed!', {}, 400, false)
     }
   },
+  viewMyNews: async (req, res) => {
+    const { id } = req.user
+    const count = await News.count({where:{user_id:id}})
+        const page = paging(req, count)
+        const { offset, pageInfo } = page
+        console.log(offset);
+        const { limitData: limit } = pageInfo
+        const result = await News.findAll({where:{user_id:id},limit,offset})
+        return responseStandard(res, 'List My News', { result, pageInfo })
+  }
+  
 }
