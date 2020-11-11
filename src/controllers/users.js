@@ -3,7 +3,7 @@
 const responseStandard = require('../helpers/response')
 const Joi = require('joi')
 const upload = require('../helpers/upload')
-const { Users,News } = require('../models')
+const { Users, News } = require('../models')
 const news = require('../models/news')
 
 module.exports = {
@@ -19,14 +19,14 @@ module.exports = {
   },
   editProfile: (req, res) => {
     const { id } = req.user
-    const uploadImage = upload.single('image')
+    const uploads = upload.single('image')
 
     const schema = Joi.object({
       email: Joi.string().email().max(255),
       userName: Joi.string().max(255)
     })
 
-    uploadImage(req, res, async (err) => {
+    uploads(req, res, async (err) => {
       if (err) {
         return responseStandard(res, err.message, {}, 400, false)
       } else {
@@ -79,35 +79,99 @@ module.exports = {
       description: Joi.string().min(20).required(),
       reference: Joi.string().uri().max(255).required()
     })
-    uploads(req, res, async (err)=>{
+    uploads(req, res, async (err) => {
       if (err) {
         return responseStandard(res, err.message, {}, 400, false)
-      } else{
+      } else {
         const image = req.file
         const { error, value } = schema.validate(req.body)
         const { title, description, reference } = value
         console.log(value)
-        
-        if (image) {
-            if (error) {
-              return responseStandard(res, error.message, {}, 400, false)
-            } else {
-              const result = {
-                user_id: id,
-                title,
-                description,
-                reference,
-                author: user.userName,
-                picture: `/uploads/${image.filename}`
-              }
-              const results = await News.create(result)
 
-              return responseStandard(res, 'Create News Successfully!',{results:results}, 200, true)
+        if (image) {
+          if (error) {
+            return responseStandard(res, error.message, {}, 400, false)
+          } else {
+            const result = {
+              user_id: id,
+              title,
+              description,
+              reference,
+              author: user.userName,
+              picture: `/uploads/${image.filename}`
             }
+            const results = await News.create(result)
+
+            return responseStandard(res, 'Create News Successfully!', { results: results }, 200, true)
+          }
         } else {
-          return responseStandard(res, 'There is a problem with the image you uploaded !',{},400,false)
+          return responseStandard(res, 'There is a problem with the image you uploaded !', {}, 400, false)
         }
       }
     })
-  }
+  },
+  editNews: async (req, res) => {
+    const { id } = req.user
+    const { idNews } = req.params
+    const uploads = upload.single('image')
+    const user = await Users.findByPk(id)
+    const schema = Joi.object({
+      title: Joi.string().min(10).max(100).required(),
+      description: Joi.string().min(20).required(),
+      reference: Joi.string().uri().max(255).required()
+    })
+    uploads(req, res, async (err) => {
+      if (err) {
+        return responseStandard(res, err.message, {}, 400, false)
+      } else {
+        const image = req.file
+        const { error, value } = schema.validate(req.body)
+        const { title, description, reference } = value
+        console.log(value)
+
+        if (title || description || reference || image) {
+          if (error) {
+            return responseStandard(res, error.message, {}, 400, false)
+          } else {
+            const changes = await News.update({
+              title,
+              description,
+              reference,
+              image: image && `/uploads/${image.filename}`
+            }, {
+              where: {
+                id: idNews,
+                author: user.userName
+              }
+            })
+            // console.log(changes[0])
+            if (changes[0] !== null && changes[0] !== undefined) {
+              return responseStandard(res, 'Edit news successfully!', {}, 200, true)
+            } else {
+              return responseStandard(res, 'Edit news failed!', {}, 400, false)
+            }
+          }
+        } else {
+          return responseStandard(res, 'There is a problem with the image you uploaded !', {}, 400, false)
+        }
+      }
+    })
+  },
+  deleteNews: async (req, res) => {
+    const { id } = req.user
+    const { idNews } = req.params
+    const user = await Users.findByPk(id)
+    const destroy = await News.destroy({
+      where: {
+        id: idNews,
+        author: user.userName
+      }
+    })
+
+    if (destroy !== null && destroy !== undefined) {
+      return responseStandard(res, 'Delete news successfully!', {})
+    } else {
+      return responseStandard(res, 'Delete news failed!', {}, 400, false)
+    }
+  },
 }
