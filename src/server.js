@@ -14,6 +14,7 @@ const authMidlleware = require('../src/middlewares/auth')
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(morgan('dev'))
 app.use(cors())
+app.use('/uploads', express.static('assets/uploads'))
 
 //
 app.use('/', authRoute)

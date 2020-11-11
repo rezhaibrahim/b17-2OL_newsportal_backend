@@ -18,8 +18,8 @@ module.exports = multer({
     let ext = file.originalname.split('.')
     ext = ext[ext.length - 1]
 
-    if (ext !== 'png' && ext !== 'jpg' && ext !== 'jpeg') {
-      return cb(new Error('Only images (.png, .jpg, .jpeg) are allowed'))
+    if (ext !== 'png' && ext !== 'jpg' && ext !== 'jpeg' && ext !== 'svg') {
+      return cb(new Error('Only images (.png, .jpg, .jpeg, .svg) are allowed'))
     }
     cb(null, true)
   },
