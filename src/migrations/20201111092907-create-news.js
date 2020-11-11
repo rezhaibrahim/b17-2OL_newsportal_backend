@@ -8,19 +8,22 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      userId: {
-        type: Sequelize.INTEGER
-      },
-      title: {
+      user_id: {
         type: Sequelize.STRING
       },
-      author: {
+      title: {
         type: Sequelize.STRING
       },
       description: {
         type: Sequelize.TEXT
       },
       reference: {
+        type: Sequelize.STRING
+      },
+      author: {
+        type: Sequelize.STRING
+      },
+      picture: {
         type: Sequelize.STRING
       },
       createdAt: {

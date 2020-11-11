@@ -14,11 +14,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   News.init({
-    userId: DataTypes.INTEGER,
+    user_id: DataTypes.STRING,
     title: DataTypes.STRING,
-    author: DataTypes.STRING,
     description: DataTypes.TEXT,
-    reference: DataTypes.STRING
+    reference: DataTypes.STRING,
+    author: DataTypes.STRING,
+    picture: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'News',
