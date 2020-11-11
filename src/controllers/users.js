@@ -6,7 +6,7 @@ const upload = require('../helpers/upload')
 const paging = require('../helpers/pagination')
 const { Users, News } = require('../models')
 const { Op } = require('sequelize')
-const { APP_URL,APP_PORT } = process.env
+const { APP_URL, APP_PORT } = process.env
 module.exports = {
   viewUserProfile: async (req, res) => {
     const { id } = req.user
@@ -177,13 +177,54 @@ module.exports = {
   },
   viewMyNews: async (req, res) => {
     const { id } = req.user
-    const count = await News.count({where:{user_id:id}})
-        const page = paging(req, count)
-        const { offset, pageInfo } = page
-        console.log(offset);
-        const { limitData: limit } = pageInfo
-        const result = await News.findAll({where:{user_id:id},limit,offset})
-        return responseStandard(res, 'List My News', { result, pageInfo })
+    let { search } = req.query
+    if (!search) {
+      search = ''
+    }
+
+    console.log('cek', req.query)
+    const count = await News.count({ where: { user_id: id } })
+    const page = paging(req, count)
+    const { offset, pageInfo } = page
+    console.log(offset)
+    const { limitData: limit } = pageInfo
+
+    const result = await News.findAll({
+      where: {
+        user_id: id,
+        [Op.or]: [{
+          title: {
+            [Op.substring]: search
+          }
+        }]
+      },
+      limit,
+      offset
+    })
+    console.log(result)
+    return responseStandard(res, 'List My News', { result, pageInfo })
+  },
+  viewMyNewsById: async (req, res) => {
+    const { id } = req.params
+
+    const schema = Joi.object({
+      id: Joi.number().integer().min(1)
+    })
+    const { error, value } = schema.validate({ id: id })
+    if (error) {
+      return responseStandard(res, error.message, {}, 400, false)
+    } else {
+      const { id } = value
+      const viewMyNewsById = await News.findByPk(id)
+
+      if (viewMyNewsById) {
+        return responseStandard(res, 'Successfully view news by!', { result: viewMyNewsById })
+      } else {
+        return responseStandard(res, 'News not found!', {}, 404, false)
+      }
+    }
   }
-  
+
 }
+
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImlhdCI6MTYwNTExMDU4OSwiZXhwIjoxNjA1MTk2OTg5fQ.Vzp5IsezyxJSS42Vv79jGzHmGN5bpopkH5hffxE5mkc

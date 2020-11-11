@@ -11,6 +11,7 @@ module.exports = (req, totalData) => {
   if (limit < 1 || limit > 100) {
     limit = 5
   }
+  console.log(totalData)
   const totalPage = Math.ceil(totalData / limit)
 
   const path = req.originalUrl.slice(1).split('?')[0]

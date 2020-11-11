@@ -10,5 +10,6 @@ route.post('/create-news', usersController.createNews)
 route.patch('/edit-news/:idNews', usersController.editNews)
 route.delete('/delete-news/:idNews', usersController.deleteNews)
 route.get('/my-news', usersController.viewMyNews)
+route.get('/my-news/:id', usersController.viewMyNewsById)
 
 module.exports = route
