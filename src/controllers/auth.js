@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken')
 module.exports = {
   login: async (req, res) => {
     const data = Object.keys(req.body)
+    console.log(req.body);
     if (data[0] === 'email') {
       const schemaLoginEmail = Joi.object({
         email: Joi.string().email().max(255).required(),
@@ -106,6 +107,7 @@ module.exports = {
     })
 
     const { error, value } = schema.validate(req.body)
+    console.log(req.body);
     if (error) {
       return responseStandard(res, error.message, {}, 400, false)
     } else {
